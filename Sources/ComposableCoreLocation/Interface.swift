@@ -1,5 +1,4 @@
 import Combine
-import ComposableArchitecture
 import CoreLocation
 
 /// A wrapper around Core Location's `CLLocationManager` that exposes its functionality through
@@ -178,11 +177,11 @@ import CoreLocation
 /// control, and even what happens when the request for their location fails. It is very easy to
 /// write these tests, and we can test deep, subtle properties of our application.
 ///
-public struct LocationManager {
+public struct LocationManager: Sendable {
   /// Actions that correspond to `CLLocationManagerDelegate` methods.
   ///
   /// See `CLLocationManagerDelegate` for more information.
-  public enum Action: Equatable {
+  public enum Action: Equatable, Sendable {
     case didChangeAuthorization(CLAuthorizationStatus)
 
     @available(tvOS, unavailable)
@@ -200,7 +199,7 @@ public struct LocationManager {
     @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    case didFailRanging(beaconConstraint: CLBeaconIdentityConstraint, error: Error)
+    case didFailRanging(beaconConstraint: BeaconConstraint, error: Error)
 
     case didFailWithError(Error)
 
@@ -242,7 +241,7 @@ public struct LocationManager {
     @available(macOS, unavailable)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    case didRangeBeacons([Beacon], satisfyingConstraint: CLBeaconIdentityConstraint)
+    case didRangeBeacons([Beacon], satisfyingConstraint: BeaconConstraint)
   }
 
   public struct Error: Swift.Error, Equatable {
@@ -253,99 +252,99 @@ public struct LocationManager {
     }
   }
 
-  public var accuracyAuthorization: () -> AccuracyAuthorization?
+  public var accuracyAuthorization: @Sendable () async -> AccuracyAuthorization?
 
-  public var authorizationStatus: () -> CLAuthorizationStatus
+  public var authorizationStatus: @Sendable () async -> CLAuthorizationStatus
 
-  public var delegate: () -> Effect<Action, Never>
-
-  @available(macOS, unavailable)
-  @available(tvOS, unavailable)
-  public var dismissHeadingCalibrationDisplay: () -> Effect<Never, Never>
+  public var delegate: @Sendable () async -> AsyncStream<Action>
 
   @available(macOS, unavailable)
   @available(tvOS, unavailable)
-  public var heading: () -> Heading?
-
-  @available(tvOS, unavailable)
-  public var headingAvailable: () -> Bool
+  public var dismissHeadingCalibrationDisplay: @Sendable () async -> Void
 
   @available(macOS, unavailable)
   @available(tvOS, unavailable)
-  @available(watchOS, unavailable)
-  public var isRangingAvailable: () -> Bool
-
-  public var location: () -> Location?
-
-  public var locationServicesEnabled: () -> Bool
+  public var heading: @Sendable () async -> Heading?
 
   @available(tvOS, unavailable)
-  @available(watchOS, unavailable)
-  public var maximumRegionMonitoringDistance: () -> CLLocationDistance
-
-  @available(tvOS, unavailable)
-  @available(watchOS, unavailable)
-  public var monitoredRegions: () -> Set<Region>
-
-  @available(tvOS, unavailable)
-  public var requestAlwaysAuthorization: () -> Effect<Never, Never>
-
-  public var requestLocation: () -> Effect<Never, Never>
-
-  public var requestWhenInUseAuthorization: () -> Effect<Never, Never>
-
-  public var requestTemporaryFullAccuracyAuthorization: (String) -> Effect<Never, Error>
-
-  public var set: (Properties) -> Effect<Never, Never>
-
-  @available(tvOS, unavailable)
-  @available(watchOS, unavailable)
-  public var significantLocationChangeMonitoringAvailable: () -> Bool
-
-  @available(tvOS, unavailable)
-  @available(watchOS, unavailable)
-  public var startMonitoringForRegion: (Region) -> Effect<Never, Never>
-
-  @available(tvOS, unavailable)
-  @available(watchOS, unavailable)
-  public var startMonitoringSignificantLocationChanges: () -> Effect<Never, Never>
+  public var headingAvailable: @Sendable () async -> Bool
 
   @available(macOS, unavailable)
   @available(tvOS, unavailable)
   @available(watchOS, unavailable)
-  public var startMonitoringVisits: () -> Effect<Never, Never>
+  public var isRangingAvailable: @Sendable () async -> Bool
 
-  @available(macOS, unavailable)
-  @available(tvOS, unavailable)
-  public var startUpdatingHeading: () -> Effect<Never, Never>
+  public var location: @Sendable () async -> Location?
 
-  @available(tvOS, unavailable)
-  public var startUpdatingLocation: () -> Effect<Never, Never>
+  public var locationServicesEnabled: @Sendable () async -> Bool
 
   @available(tvOS, unavailable)
   @available(watchOS, unavailable)
-  public var stopMonitoringForRegion: (Region) -> Effect<Never, Never>
+  public var maximumRegionMonitoringDistance: @Sendable () async -> CLLocationDistance
 
   @available(tvOS, unavailable)
   @available(watchOS, unavailable)
-  public var stopMonitoringSignificantLocationChanges: () -> Effect<Never, Never>
+  public var monitoredRegions: @Sendable () async -> Set<Region>
+
+  @available(tvOS, unavailable)
+  public var requestAlwaysAuthorization: @Sendable () async -> Void
+
+  public var requestLocation: @Sendable () async -> Void
+
+  public var requestWhenInUseAuthorization: @Sendable () async -> Void
+
+  public var requestTemporaryFullAccuracyAuthorization: @Sendable (String) async throws -> Void
+
+  public var set: @Sendable (Properties) async -> Void
+
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public var significantLocationChangeMonitoringAvailable: @Sendable () async -> Bool
+
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public var startMonitoringForRegion: @Sendable (Region) async -> Void
+
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public var startMonitoringSignificantLocationChanges: @Sendable () async -> Void
 
   @available(macOS, unavailable)
   @available(tvOS, unavailable)
   @available(watchOS, unavailable)
-  public var stopMonitoringVisits: () -> Effect<Never, Never>
+  public var startMonitoringVisits: @Sendable () async -> Void
 
   @available(macOS, unavailable)
   @available(tvOS, unavailable)
-  public var stopUpdatingHeading: () -> Effect<Never, Never>
+  public var startUpdatingHeading: @Sendable () async -> Void
 
-  public var stopUpdatingLocation: () -> Effect<Never, Never>
+  @available(tvOS, unavailable)
+  public var startUpdatingLocation: @Sendable () async -> Void
+
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public var stopMonitoringForRegion: @Sendable (Region) async -> Void
+
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public var stopMonitoringSignificantLocationChanges: @Sendable () async -> Void
+
+  @available(macOS, unavailable)
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public var stopMonitoringVisits: @Sendable () async -> Void
+
+  @available(macOS, unavailable)
+  @available(tvOS, unavailable)
+  public var stopUpdatingHeading: @Sendable () async -> Void
+
+  public var stopUpdatingLocation: @Sendable () async -> Void
 
   /// Updates the given properties of a uniquely identified `CLLocationManager`.
   @available(macOS, unavailable)
   @available(tvOS, unavailable)
   @available(watchOS, unavailable)
-  public func set(
+  @Sendable public func set(
     activityType: CLActivityType? = nil,
     allowsBackgroundLocationUpdates: Bool? = nil,
     desiredAccuracy: CLLocationAccuracy? = nil,
@@ -354,8 +353,8 @@ public struct LocationManager {
     headingOrientation: CLDeviceOrientation? = nil,
     pausesLocationUpdatesAutomatically: Bool? = nil,
     showsBackgroundLocationIndicator: Bool? = nil
-  ) -> Effect<Never, Never> {
-    self.set(
+  ) async {
+    await self.set(
       Properties(
         activityType: activityType,
         allowsBackgroundLocationUpdates: allowsBackgroundLocationUpdates,
